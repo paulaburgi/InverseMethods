@@ -1,0 +1,210 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>inverse_hw1_prob4</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-09-17"><meta name="DC.source" content="inverse_hw1_prob4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% Paula Burgi</span>
+<span class="comment">% Homework 1, problem 4</span>
+
+db = 40e-3; <span class="comment">%depth of well, (km)</span>
+st = 2; <span class="comment">%slowness at top of well (s/km)</span>
+sb = 5; <span class="comment">%slowness at bottom of well (s/km)</span>
+dd = 0.5e-3; <span class="comment">%interval of slowness measurements (km)</span>
+
+n = 80;  <span class="comment">% number of data points</span>
+dpt = linspace(dd,db,n)'; <span class="comment">% depth intervals</span>
+m = 80; <span class="comment">% number of model params</span>
+
+s = linspace(st,sb,n)'; <span class="comment">% linear slowness increase linearly</span>
+<span class="comment">% PROB 4A</span>
+    s((3/8)*n:(5/8)*n) = 2; <span class="comment">% modify s.t. n=15-25 = 2 s/m</span>
+<span class="comment">% PROB 4B</span>
+    G = tril(ones(m,n).*0.5);
+<span class="comment">% PROB 4C</span>
+    d1 = G*s; <span class="comment">% data generated for n=80</span>
+<span class="comment">% PROB 4D</span>
+    ns   = rand(m,1).*0.1; <span class="comment">% random noise with std=0.1</span>
+    dns1 = d1+ns; <span class="comment">% add noise to data</span>
+<span class="comment">% PROB 4E</span>
+    slsq1 = inv(G'*G)*G'*dns1; <span class="comment">% lsq solution</span>
+    sdd1  = diff(dns1)/0.5; <span class="comment">% take difference and normalize to dd</span>
+
+
+<span class="comment">% Sample 160 points</span>
+n = 160;  <span class="comment">% number of data points</span>
+dpt2 = linspace(dd,db,n)'; <span class="comment">% depth intervals</span>
+
+<span class="comment">% PROB 4B</span>
+    G = tril(ones(m,m).*0.5);
+    G = reshape([G(:) G(:)]',2*size(G,1), []); <span class="comment">% interleaf elements of G to reflect over sampling</span>
+    <span class="keyword">for</span> i = 1:2:length(G)
+        G(i,(i+1)/2) = .25; <span class="comment">% set elements at 1/2 steps equal to half the depth interval</span>
+    <span class="keyword">end</span>
+<span class="comment">% PROB 4C</span>
+    d = G*s; <span class="comment">% data generated for n=160</span>
+<span class="comment">% PROB 4D</span>
+    ns = rand(n,1).*0.1; <span class="comment">% random noise with std=0.1</span>
+    dns = d+ns; <span class="comment">% add noise to data</span>
+
+<span class="comment">% PROB 4E</span>
+    slsq = inv(G'*G)*G'*dns; <span class="comment">% lsq solution</span>
+    sdd = diff(dns)/.25; <span class="comment">% take difference and normalize to dd</span>
+
+<span class="comment">% Plot</span>
+figure(<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'outerposition'</span>,[.2 .2 .7 .5]);  hold <span class="string">on</span>;
+subplot(1,2,1); hold <span class="string">on</span>; box <span class="string">on</span>;
+plot(dpt*1e3, s, <span class="string">'-k'</span>, <span class="string">'linewidth'</span>, 2);
+plot(dpt*1e3, slsq1, <span class="string">'-r.'</span>);
+plot(dpt*1e3, [s(1); sdd1], <span class="string">'--b.'</span>);
+xlabel(<span class="string">'depth (m)'</span>);
+ylabel(<span class="string">'slowness (s/km)'</span>);
+title(<span class="string">'N=80 data points'</span>);
+
+subplot(1,2,2); hold <span class="string">on</span>; box <span class="string">on</span>;
+plot(dpt*1e3, s, <span class="string">'-k'</span>, <span class="string">'linewidth'</span>, 2);
+plot(dpt2*1e3, [s(1); sdd], <span class="string">'-b.'</span>);
+plot(dpt*1e3, slsq, <span class="string">'-r.'</span>);
+xlabel(<span class="string">'depth (m)'</span>);
+ylabel(<span class="string">'slowness (s/km)'</span>);
+title(<span class="string">'N=160 data points'</span>);
+legend(<span class="string">'True slowness'</span>, <span class="string">'Est Slowness (LSQ)'</span>, <span class="string">'Est. Slowness (diff)'</span>, <span class="keyword">...</span>
+    <span class="string">'location'</span>, <span class="string">'northwest'</span>);
+</pre><img vspace="5" hspace="5" src="inverse_hw1_prob4_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Paula Burgi
+% Homework 1, problem 4
+
+db = 40e-3; %depth of well, (km) 
+st = 2; %slowness at top of well (s/km)
+sb = 5; %slowness at bottom of well (s/km)
+dd = 0.5e-3; %interval of slowness measurements (km)
+
+n = 80;  % number of data points
+dpt = linspace(dd,db,n)'; % depth intervals
+m = 80; % number of model params
+
+s = linspace(st,sb,n)'; % linear slowness increase linearly
+% PROB 4A
+    s((3/8)*n:(5/8)*n) = 2; % modify s.t. n=15-25 = 2 s/m
+% PROB 4B
+    G = tril(ones(m,n).*0.5); 
+% PROB 4C
+    d1 = G*s; % data generated for n=80
+% PROB 4D
+    ns   = rand(m,1).*0.1; % random noise with std=0.1
+    dns1 = d1+ns; % add noise to data
+% PROB 4E 
+    slsq1 = inv(G'*G)*G'*dns1; % lsq solution
+    sdd1  = diff(dns1)/0.5; % take difference and normalize to dd
+
+
+% Sample 160 points
+n = 160;  % number of data points
+dpt2 = linspace(dd,db,n)'; % depth intervals
+
+% PROB 4B
+    G = tril(ones(m,m).*0.5); 
+    G = reshape([G(:) G(:)]',2*size(G,1), []); % interleaf elements of G to reflect over sampling
+    for i = 1:2:length(G) 
+        G(i,(i+1)/2) = .25; % set elements at 1/2 steps equal to half the depth interval 
+    end
+% PROB 4C
+    d = G*s; % data generated for n=160
+% PROB 4D
+    ns = rand(n,1).*0.1; % random noise with std=0.1
+    dns = d+ns; % add noise to data
+    
+% PROB 4E 
+    slsq = inv(G'*G)*G'*dns; % lsq solution
+    sdd = diff(dns)/.25; % take difference and normalize to dd
+
+% Plot 
+figure('units','normalized','outerposition',[.2 .2 .7 .5]);  hold on; 
+subplot(1,2,1); hold on; box on; 
+plot(dpt*1e3, s, '-k', 'linewidth', 2); 
+plot(dpt*1e3, slsq1, '-r.'); 
+plot(dpt*1e3, [s(1); sdd1], 'REPLACE_WITH_DASH_DASHb.'); 
+xlabel('depth (m)'); 
+ylabel('slowness (s/km)'); 
+title('N=80 data points'); 
+
+subplot(1,2,2); hold on; box on; 
+plot(dpt*1e3, s, '-k', 'linewidth', 2); 
+plot(dpt2*1e3, [s(1); sdd], '-b.'); 
+plot(dpt*1e3, slsq, '-r.'); 
+xlabel('depth (m)'); 
+ylabel('slowness (s/km)'); 
+title('N=160 data points'); 
+legend('True slowness', 'Est Slowness (LSQ)', 'Est. Slowness (diff)', ...
+    'location', 'northwest'); 
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
