@@ -29,7 +29,7 @@ def csd(Q1,Q2):
     m,p = Q1.shape
     n,pb = Q2.shape
     if pb != p:
-        print "gsvd Matrix Column Mismatch : Matrices must have the same number of columns"
+        print("gsvd Matrix Column Mismatch : Matrices must have the same number of columns")
         sys.exit()
     if m < n:
         V,U,Z,S,C = csd(Q2,Q1)
@@ -252,7 +252,7 @@ def gsvd(A,B,*arg):
     m,p = A.shape
     n,pb = B.shape
     if pb != p:
-        print "gsvd Matrix Column Mismatch : Matrices must have the same number of columns"
+        print("gsvd Matrix Column Mismatch : Matrices must have the same number of columns")
         sys.exit()
     QA = []
     QB = []
@@ -286,7 +286,7 @@ def gsvd(A,B,*arg):
     if QB:
         V = np.dot(QB,V)
 
-    print "All done gsvd!"
+    print("All done gsvd!")
     return U,V,X,C,S
     
 
