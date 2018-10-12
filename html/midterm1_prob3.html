@@ -1,0 +1,291 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>midterm1_prob3</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-10-11"><meta name="DC.source" content="midterm1_prob3.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% midterm 1, problem 3</span>
+
+
+<span class="comment">% set r to be variable</span>
+r = sym(<span class="string">'r'</span>);
+<span class="comment">% mass and inertia equations</span>
+Md = (4.*pi.*r.^2);
+Id = ((8/3).*pi.*r.^4);
+G  = [Md; Id];
+M  = int(Md,r);
+I  = int(Id,r);
+
+<span class="comment">%EARTH</span>
+<span class="comment">% parameters for earth (data)</span>
+Re = 6.3708e6;
+Me = 5.972e24;
+Ie = 8.034e37;
+d  = [Me; Ie];
+
+<span class="comment">% calculate q</span>
+q1 = eval(int(Md,r, 0, Re));
+q2 = eval(int(Id,r, 0, Re));
+q  = [q1; q2];
+
+<span class="comment">% set up to interate over all radii</span>
+Ri = [0:50000:Re];
+mest_all = [];
+k_all = [];
+
+<span class="comment">% interate over radii</span>
+<span class="keyword">for</span> i=1:length(Ri)
+    <span class="comment">% radius</span>
+    ri = Ri(i);
+    <span class="comment">% calculate H</span>
+    H0 = G*G'*((r-ri).^2);
+    H = eval(int(H0, 0, Re));
+    <span class="comment">%calculate c</span>
+    c = (inv(H)*q)./(q'*inv(H)*q);
+    <span class="comment">% calculate mest</span>
+    mest = c'*d;
+    mest_all = [mest_all; mest];
+    <span class="comment">% calculate k</span>
+    k(r) = c'*G;
+    k_all = [k_all; eval(k(Ri))];
+<span class="keyword">end</span>
+
+figure(<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'outerposition'</span>,[0 0 .7 .5]);
+subplot(1,2,1)
+plot(mest_all, Ri./1e3);
+title(<span class="string">'Earth Density'</span>);
+xlabel(<span class="string">'Density (g/cm^3)'</span>);
+ylabel(<span class="string">'Radial Distance from center (km)'</span>);
+xlim([3800 7800]);
+subplot(1,2,2)
+pcolor(flipud(k_all)); shading <span class="string">flat</span>;
+colormap <span class="string">gray</span>
+title(<span class="string">'Kernel K(r,rh)'</span>);
+
+<span class="comment">% MARS</span>
+<span class="comment">% parameters for mars (data)</span>
+Re = 3.389e6;
+Me = 0.642e24;
+Ie = 2.709e36;
+d  = [Me; Ie];
+
+<span class="comment">% calculate q</span>
+q1 = eval(int(Md,r, 0, Re));
+q2 = eval(int(Id,r, 0, Re));
+q  = [q1; q2];
+
+<span class="comment">% set up to interate over all radii</span>
+Ri = [0:50000:Re];
+mest_all = [];
+k_all = [];
+
+<span class="comment">% interate over radii</span>
+<span class="keyword">for</span> i=1:length(Ri)
+    <span class="comment">% radius</span>
+    ri = Ri(i);
+    <span class="comment">% calculate H</span>
+    H0 = G*G'*((r-ri).^2);
+    H = eval(int(H0, 0, Re));
+    <span class="comment">%calculate c</span>
+    c = (inv(H)*q)./(q'*inv(H)*q);
+    <span class="comment">% calculate mest</span>
+    mest = c'*d;
+    mest_all = [mest_all; mest];
+    <span class="comment">% calculate k</span>
+    k(r) = c'*G;
+    k_all = [k_all; eval(k(Ri))];
+<span class="keyword">end</span>
+
+figure(<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'outerposition'</span>,[0 0 .7 .5]);
+subplot(1,2,1)
+plot(mest_all, Ri./1e3);
+title(<span class="string">'Mars Density'</span>);
+xlabel(<span class="string">'Density (g/cm^3)'</span>);
+ylabel(<span class="string">'Radial Distance from center (km)'</span>);
+xlim([3300 4700]);
+subplot(1,2,2)
+pcolor(flipud(k_all)); shading <span class="string">flat</span>;
+colormap <span class="string">gray</span>
+title(<span class="string">'Kernel K(r,rh)'</span>);
+</pre><img vspace="5" hspace="5" src="midterm1_prob3_01.png" alt=""> <img vspace="5" hspace="5" src="midterm1_prob3_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% midterm 1, problem 3
+
+
+% set r to be variable
+r = sym('r');
+% mass and inertia equations
+Md = (4.*pi.*r.^2); 
+Id = ((8/3).*pi.*r.^4); 
+G  = [Md; Id]; 
+M  = int(Md,r); 
+I  = int(Id,r); 
+
+%EARTH
+% parameters for earth (data)
+Re = 6.3708e6; 
+Me = 5.972e24;
+Ie = 8.034e37; 
+d  = [Me; Ie];
+
+% calculate q
+q1 = eval(int(Md,r, 0, Re)); 
+q2 = eval(int(Id,r, 0, Re)); 
+q  = [q1; q2];
+
+% set up to interate over all radii 
+Ri = [0:50000:Re]; 
+mest_all = []; 
+k_all = [];
+
+% interate over radii
+for i=1:length(Ri)
+    % radius
+    ri = Ri(i); 
+    % calculate H
+    H0 = G*G'*((r-ri).^2); 
+    H = eval(int(H0, 0, Re)); 
+    %calculate c
+    c = (inv(H)*q)./(q'*inv(H)*q);  
+    % calculate mest
+    mest = c'*d; 
+    mest_all = [mest_all; mest]; 
+    % calculate k
+    k(r) = c'*G; 
+    k_all = [k_all; eval(k(Ri))]; 
+end
+
+figure('units','normalized','outerposition',[0 0 .7 .5]); 
+subplot(1,2,1)
+plot(mest_all, Ri./1e3); 
+title('Earth Density'); 
+xlabel('Density (g/cm^3)'); 
+ylabel('Radial Distance from center (km)'); 
+xlim([3800 7800]); 
+subplot(1,2,2)
+pcolor(flipud(k_all)); shading flat;
+colormap gray
+title('Kernel K(r,rh)'); 
+
+% MARS 
+% parameters for mars (data)
+Re = 3.389e6; 
+Me = 0.642e24;
+Ie = 2.709e36; 
+d  = [Me; Ie];
+
+% calculate q
+q1 = eval(int(Md,r, 0, Re)); 
+q2 = eval(int(Id,r, 0, Re)); 
+q  = [q1; q2];
+
+% set up to interate over all radii 
+Ri = [0:50000:Re]; 
+mest_all = []; 
+k_all = [];
+
+% interate over radii
+for i=1:length(Ri)
+    % radius
+    ri = Ri(i); 
+    % calculate H
+    H0 = G*G'*((r-ri).^2); 
+    H = eval(int(H0, 0, Re)); 
+    %calculate c
+    c = (inv(H)*q)./(q'*inv(H)*q);  
+    % calculate mest
+    mest = c'*d; 
+    mest_all = [mest_all; mest]; 
+    % calculate k
+    k(r) = c'*G; 
+    k_all = [k_all; eval(k(Ri))]; 
+end
+
+figure('units','normalized','outerposition',[0 0 .7 .5]); 
+subplot(1,2,1)
+plot(mest_all, Ri./1e3); 
+title('Mars Density'); 
+xlabel('Density (g/cm^3)'); 
+ylabel('Radial Distance from center (km)'); 
+xlim([3300 4700]); 
+subplot(1,2,2)
+pcolor(flipud(k_all)); shading flat;
+colormap gray
+title('Kernel K(r,rh)'); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
