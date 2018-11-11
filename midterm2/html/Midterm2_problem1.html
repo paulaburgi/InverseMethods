@@ -1,0 +1,362 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Midterm2_problem1</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-07"><meta name="DC.source" content="Midterm2_problem1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Part b: Determine S and T</a></li><li><a href="#3">Part c: Sate S and T with STD</a></li><li><a href="#4">Part d: plot</a></li><li><a href="#5">Part e: Chi^2 contours</a></li><li><a href="#6">part f: P-value calculation</a></li></ul></div><pre class="codeinput"><span class="comment">% Paula Burgi</span>
+<span class="comment">% Midterm 2, Problem 1</span>
+
+clear
+close <span class="string">all</span>
+</pre><h2 id="2">Part b: Determine S and T</h2><pre class="codeinput"><span class="comment">% data input</span>
+t  = [5 10 20 30 40 50]';
+hm = [0.80 0.78 0.54 0.41 0.33 0.27]';
+
+<span class="comment">% equation parameters</span>
+T = sym(<span class="string">'T'</span>); <span class="comment">% Trasmissivity (m^2/hr)</span>
+S = sym(<span class="string">'S'</span>); <span class="comment">% Storativity (dimensionless)</span>
+Q = 50;       <span class="comment">% Water volume in (m^3)</span>
+d = 60;       <span class="comment">% Dist between wells (m)</span>
+s = 0.01;     <span class="comment">% Standard deviation (m)</span>
+
+<span class="comment">% input functional form of slug test</span>
+h1  = Q./(4.*pi.*T.*t);
+h2  = exp((-(d.^2).*S)./(4.*T.*t));
+hd  = h1.*h2;
+<span class="comment">% calculate residual between functional form and data</span>
+h   = hd-hm;
+
+<span class="comment">% calculate Jacobian</span>
+fiS = diff(h, S);
+fiT = diff(h, T);
+J   = [fiS fiT];
+
+<span class="comment">% calculate covariance matrix</span>
+n  = length(t);
+Cd = eye(n)*(s.^2);
+
+<span class="comment">% initial guess</span>
+S0    = 7e-4;
+T0    = .2;
+var0  = [S0; T0];
+
+<span class="comment">% Use LM method to calculate T &amp; S</span>
+[x, k, Cm, chi2] = LMLSQ(h, Cd, var0, J);
+
+disp([<span class="string">'Number of iterations to convergence: '</span> num2str(k)]);
+</pre><pre class="codeoutput">Number of iterations to convergence: 11
+</pre><h2 id="3">Part c: Sate S and T with STD</h2><pre class="codeinput"><span class="comment">% get values of S and T</span>
+Sf     = x(1);
+Tf     = x(2);
+<span class="comment">% find uncertainty</span>
+sm     = diag(Cm);
+Ssig   = sqrt(sm(1));
+Tsig   = sqrt(sm(2));
+
+disp([<span class="string">'Calculated T with 1-sigma error: '</span> num2str(Tf) char(177) num2str(Tsig)]);
+disp([<span class="string">'Calculated S with 1-sigma error: '</span> num2str(Sf) char(177) num2str(Ssig)]);
+</pre><pre class="codeoutput">Calculated T with 1-sigma error: 0.26015&plusmn;0.0036874
+Calculated S with 1-sigma error: 0.0019407&plusmn;1.6014e-05
+</pre><h2 id="4">Part d: plot</h2><pre class="codeinput">figure(1); hold <span class="string">on</span>; box <span class="string">on</span>;
+errorbar(t, hm, sqrt(diag(Cd)), <span class="string">'-k.'</span>, <span class="string">'markersize'</span>, 10);
+T = T0;
+S = S0;
+h0 = eval(subs(hd));
+plot(t, h0, <span class="string">'-k.'</span>, <span class="string">'markersize'</span>, 10, <span class="string">'color'</span>, [.8 0 0]);
+T = Tf;
+S = Sf;
+hf = eval(subs(hd));
+plot(t, hf, <span class="string">'-k.'</span>, <span class="string">'markersize'</span>, 10, <span class="string">'color'</span>, [0 .8 0]);
+xlabel(<span class="string">'time (hr)'</span>);
+ylabel(<span class="string">'head (m)'</span>);
+title(<span class="string">'Slug Test Results'</span>);
+legend(<span class="string">'Data'</span>, <span class="keyword">...</span>
+       [<span class="string">'Initial Guess:    T='</span> num2str(T0) <span class="string">',            S='</span> num2str(S0)], <span class="keyword">...</span>
+       [<span class="string">'LMLSQ Results: T='</span> num2str(Tf) <span class="string">',   S='</span> num2str(Sf)]);
+</pre><img vspace="5" hspace="5" src="Midterm2_problem1_01.png" alt=""> <h2 id="5">Part e: Chi^2 contours</h2><pre class="codeinput">Ti = [.1:.1:2]';
+Si = [3e-4:3e-4:6e-3]';
+X2 = [];
+idx = [];
+<span class="keyword">for</span> i=1:length(Ti)
+    <span class="keyword">for</span> j = 1:length(Si)
+        T = Ti(i);
+        S = Si(j);
+        r = eval(subs(h))./s;
+        xi = r'*r;
+        X2 = [X2; xi];
+        idx = [idx; i j];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+X2r = reshape(X2, length(Si), length(Ti))';
+
+figure(<span class="string">'units'</span>, <span class="string">'normalized'</span>, <span class="string">'outerposition'</span>, [.2 .2 .8 .6]); hold <span class="string">on</span>;
+subplot(1,2,1); hold <span class="string">on</span>; box <span class="string">on</span>;
+[col,row] = meshgrid(Si,Ti);
+[M,c] = contour(col, row, X2r, [1e3 2e3:2e3:12e3], <span class="string">'ShowText'</span>,<span class="string">'on'</span>, <span class="string">'color'</span>, <span class="string">'k'</span>);
+xlabel(<span class="string">'Storage coef (S)'</span>);
+ylabel(<span class="string">'Transmissivity (T)'</span>);
+plot(Sf, Tf, <span class="string">'r*'</span>);
+title(<span class="string">'Chi-squared contour plot'</span>);
+Tz1 = .2;     Tz2 = .32;
+Sz1 = 1.6e-3; Sz2 = 2.3e-3;
+plot([Sz1 Sz1 Sz2 Sz2 Sz1], [Tz1 Tz2 Tz2 Tz1 Tz1], <span class="string">'-b'</span>, <span class="string">'linewidth'</span>, 2);
+
+ <span class="comment">% make zoom in around minimum</span>
+Ti = [Tz1:.005:Tz2]';
+Si = [Sz1:.2e-4:Sz2]';
+X2 = [];
+idx = [];
+<span class="keyword">for</span> i=1:length(Ti)
+    <span class="keyword">for</span> j = 1:length(Si)
+        T = Ti(i);
+        S = Si(j);
+        r = eval(subs(h))./s;
+        xi = r'*r;
+        X2 = [X2; xi];
+        idx = [idx; i j];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+X2r = reshape(X2, length(Si), length(Ti))';
+
+ax2 = subplot(1,2,2); hold <span class="string">on</span>; box <span class="string">on</span>;
+[col,row] = meshgrid(Si,Ti);
+[M,c] = contour(col, row, X2r, [10 50 100 1e2:1e2:6e2], <span class="string">'ShowText'</span>,<span class="string">'on'</span>, <span class="string">'color'</span>, <span class="string">'k'</span>);
+xlabel(<span class="string">'Storage coef (S)'</span>);
+ylabel(<span class="string">'Transmissivity (T)'</span>);
+plot(Sf, Tf, <span class="string">'r*'</span>);
+title(<span class="string">'Chi-squared contour plot (zoom)'</span>);
+</pre><img vspace="5" hspace="5" src="Midterm2_problem1_02.png" alt=""> <h2 id="6">part f: P-value calculation</h2><pre class="codeinput">p_value = chi2cdf(chi2,n-length(var0), <span class="string">'upper'</span>)
+
+<span class="comment">% This p-value is ~90%, which means that this result is acceptable.</span>
+</pre><pre class="codeoutput">
+p_value =
+
+   0.900954213026755
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Paula Burgi
+% Midterm 2, Problem 1
+
+clear
+close all
+
+%% Part b: Determine S and T 
+
+% data input
+t  = [5 10 20 30 40 50]';
+hm = [0.80 0.78 0.54 0.41 0.33 0.27]'; 
+
+% equation parameters
+T = sym('T'); % Trasmissivity (m^2/hr) 
+S = sym('S'); % Storativity (dimensionless)
+Q = 50;       % Water volume in (m^3)
+d = 60;       % Dist between wells (m)
+s = 0.01;     % Standard deviation (m)
+
+% input functional form of slug test
+h1  = Q./(4.*pi.*T.*t); 
+h2  = exp((-(d.^2).*S)./(4.*T.*t)); 
+hd  = h1.*h2;
+% calculate residual between functional form and data
+h   = hd-hm; 
+
+% calculate Jacobian
+fiS = diff(h, S); 
+fiT = diff(h, T); 
+J   = [fiS fiT];
+
+% calculate covariance matrix
+n  = length(t); 
+Cd = eye(n)*(s.^2); 
+
+% initial guess 
+S0    = 7e-4; 
+T0    = .2;
+var0  = [S0; T0];
+
+% Use LM method to calculate T & S 
+[x, k, Cm, chi2] = LMLSQ(h, Cd, var0, J); 
+
+disp(['Number of iterations to convergence: ' num2str(k)]); 
+
+
+%% Part c: Sate S and T with STD
+
+% get values of S and T
+Sf     = x(1); 
+Tf     = x(2); 
+% find uncertainty 
+sm     = diag(Cm); 
+Ssig   = sqrt(sm(1)); 
+Tsig   = sqrt(sm(2)); 
+
+disp(['Calculated T with 1-sigma error: ' num2str(Tf) char(177) num2str(Tsig)]); 
+disp(['Calculated S with 1-sigma error: ' num2str(Sf) char(177) num2str(Ssig)]); 
+
+%% Part d: plot
+
+figure(1); hold on; box on; 
+errorbar(t, hm, sqrt(diag(Cd)), '-k.', 'markersize', 10); 
+T = T0; 
+S = S0; 
+h0 = eval(subs(hd));
+plot(t, h0, '-k.', 'markersize', 10, 'color', [.8 0 0]); 
+T = Tf; 
+S = Sf; 
+hf = eval(subs(hd));
+plot(t, hf, '-k.', 'markersize', 10, 'color', [0 .8 0]); 
+xlabel('time (hr)');
+ylabel('head (m)'); 
+title('Slug Test Results'); 
+legend('Data', ...
+       ['Initial Guess:    T=' num2str(T0) ',            S=' num2str(S0)], ...
+       ['LMLSQ Results: T=' num2str(Tf) ',   S=' num2str(Sf)]); 
+
+
+%% Part e: Chi^2 contours
+Ti = [.1:.1:2]'; 
+Si = [3e-4:3e-4:6e-3]';
+X2 = []; 
+idx = [];
+for i=1:length(Ti)
+    for j = 1:length(Si)
+        T = Ti(i); 
+        S = Si(j); 
+        r = eval(subs(h))./s; 
+        xi = r'*r; 
+        X2 = [X2; xi]; 
+        idx = [idx; i j];
+    end
+end
+X2r = reshape(X2, length(Si), length(Ti))'; 
+
+figure('units', 'normalized', 'outerposition', [.2 .2 .8 .6]); hold on; 
+subplot(1,2,1); hold on; box on; 
+[col,row] = meshgrid(Si,Ti);
+[M,c] = contour(col, row, X2r, [1e3 2e3:2e3:12e3], 'ShowText','on', 'color', 'k');
+xlabel('Storage coef (S)'); 
+ylabel('Transmissivity (T)'); 
+plot(Sf, Tf, 'r*'); 
+title('Chi-squared contour plot'); 
+Tz1 = .2;     Tz2 = .32; 
+Sz1 = 1.6e-3; Sz2 = 2.3e-3;  
+plot([Sz1 Sz1 Sz2 Sz2 Sz1], [Tz1 Tz2 Tz2 Tz1 Tz1], '-b', 'linewidth', 2); 
+
+ % make zoom in around minimum 
+Ti = [Tz1:.005:Tz2]'; 
+Si = [Sz1:.2e-4:Sz2]';
+X2 = []; 
+idx = [];
+for i=1:length(Ti)
+    for j = 1:length(Si)
+        T = Ti(i); 
+        S = Si(j); 
+        r = eval(subs(h))./s; 
+        xi = r'*r; 
+        X2 = [X2; xi]; 
+        idx = [idx; i j];
+    end
+end
+X2r = reshape(X2, length(Si), length(Ti))'; 
+
+ax2 = subplot(1,2,2); hold on; box on; 
+[col,row] = meshgrid(Si,Ti);
+[M,c] = contour(col, row, X2r, [10 50 100 1e2:1e2:6e2], 'ShowText','on', 'color', 'k');
+xlabel('Storage coef (S)'); 
+ylabel('Transmissivity (T)'); 
+plot(Sf, Tf, 'r*'); 
+title('Chi-squared contour plot (zoom)'); 
+
+        
+        
+        
+        
+%% part f: P-value calculation
+
+p_value = chi2cdf(chi2,n-length(var0), 'upper')
+
+% This p-value is ~90%, which means that this result is acceptable. 
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+##### SOURCE END #####
+--></body></html>

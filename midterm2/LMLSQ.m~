@@ -1,7 +1,7 @@
 % Midterm 1
-% Problem 1, part a
+% Problem 1 subroutine
 
-function [x, k, Cm, X2] = LMLSQ(h, Cd, var0, J)
+function [x, k, Cm] = LMLSQ(h, Cd, var0, J)
 % INPUTS:
 % h    = Functional form of our inverse problem - data (n x 1 symbolic)
 % Cd   = Covariance matrix (n x n)
@@ -14,13 +14,11 @@ function [x, k, Cm, X2] = LMLSQ(h, Cd, var0, J)
 % x    = vector containing final estimation of variables
 % k    = number of iterations needed to converge on final estimations
 % Cm   = model covariance matrix
-% X2   = Chi-squared value
 
 % Set generic parameters
-v     = 0.5;           % Dampening factor
-l0    = 1;           % Lamda (dampening)
-ep    = 1e-9;          % Accuracy for calculation
-Cdi   = inv(sqrt(Cd)); % invert covariance matrix & sqrt
+v     = 0.9;   % Dampening factor
+l0    = 1e3;   % Lamda (dampening)
+ep    = 1e-10; % Accuracy for calculation
 
 % Find number of variables to solve for
 lmvars = symvar(h); 
@@ -29,9 +27,8 @@ nd     = length(J);
 
 % Set number of iterations 
 % Note: Will only iterate until convergence test is passed
-nints = 20; 
+nints = 200; 
 
-dea = []; dca = [];
 % Iterate 
 for k = 1:nints
     % find initial values
@@ -41,21 +38,20 @@ for k = 1:nints
             evalc([varstr '=' num2str(var0(j))]); 
         end
         l = l0; 
-        fi = Cdi*eval(subs(h)); 
+        fi = sqrt(Cd)*eval(subs(h)); 
         ri = (fi'*fi); 
         ci = 0;
     end
     
     % calculate Jacobian
-    Ji = Cdi*eval(subs(J)); 
+    Ji = eval(subs(J)); 
     % calculate residual function
-    fi = Cdi*eval(subs(h));
+    fi = inv(sqrt(eval(subs(h));
 
     % calculate convergence test
     cn = 2.*Ji'*fi; 
     dc = mean(abs(cn-ci)); 
     de = mean(ep.*(1+abs(cn))); 
-    dca = [dca; dc]; dea = [dea; de];
     if dc < de
         break % stops the for-loop if convergence test is passed
     end
@@ -89,13 +85,12 @@ for k = 1:nints
     ri = rn; 
     ci = cn; 
     
-    disp(k); 
     
 end
 
-Cm = inv(Ji'*Ji); 
+s  = sqrt(ri./(nd-nv)); 
+Cm = (s.^2).*inv(Ji'*Ji); 
 x  = eval(lmvars); 
-X2 = ri; 
 
 
 
