@@ -16,30 +16,33 @@ S = sym('S'); % Storativity (dimensionless)
 Q = 50;       % Water volume in (m^3)
 d = 60;       % Dist between wells (m)
 s = 0.01;     % Standard deviation (m)
+% calculate covariance matrix
+n  = length(t); 
+Cd = eye(n)*(s.^2); 
+Cdi = inv(sqrt(Cd)); 
 
 % input functional form of slug test
 h1  = Q./(4.*pi.*T.*t); 
 h2  = exp((-(d.^2).*S)./(4.*T.*t)); 
 hd  = h1.*h2;
 % calculate residual between functional form and data
-h   = hd-hm; 
+h   = Cdi*(hd-hm); 
 
 % calculate Jacobian
 fiS = diff(h, S); 
 fiT = diff(h, T); 
 J   = [fiS fiT];
 
-% calculate covariance matrix
-n  = length(t); 
-Cd = eye(n)*(s.^2); 
-
 % initial guess 
 S0    = 7e-4; 
 T0    = .2;
 var0  = [S0; T0];
 
+% convergence criteria 
+ep    = 1e-9; 
+
 % Use LM method to calculate T & S 
-[x, k, Cm, chi2] = LMLSQ(h, Cd, var0, J); 
+[x, k, Cm, chi2] = LMLSQ(h, var0, J, ep); 
 
 disp(['Number of iterations to convergence: ' num2str(k)]); 
 
@@ -86,7 +89,7 @@ for i=1:length(Ti)
     for j = 1:length(Si)
         T = Ti(i); 
         S = Si(j); 
-        r = eval(subs(h))./s; 
+        r = eval(subs(h)); 
         xi = r'*r; 
         X2 = [X2; xi]; 
         idx = [idx; i j];
@@ -115,7 +118,7 @@ for i=1:length(Ti)
     for j = 1:length(Si)
         T = Ti(i); 
         S = Si(j); 
-        r = eval(subs(h))./s; 
+        r = eval(subs(h)); 
         xi = r'*r; 
         X2 = [X2; xi]; 
         idx = [idx; i j];

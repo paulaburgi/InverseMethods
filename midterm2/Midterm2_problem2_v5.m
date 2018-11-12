@@ -108,7 +108,7 @@ legend('true model', 'initial guess', 'LM non-reg solution');
 
 p_value = chi2cdf(X2,m-n, 'upper')
 
-% The p-value for the the non-regularized result is 0. This implies that it
+% the p-value for the the non-regularized result is 0. This implies that it
 % is outside the limits of a good p-value. 
 
 

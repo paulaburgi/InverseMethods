@@ -1,35 +1,39 @@
 % Midterm 1
 % Problem 1, part a
 
-function [x, k, Cm, X2] = LMLSQ(h, Cd, var0, J)
+function [x, k, Cm, X2] = LMLSQ(h, var0, J, ep)
+
 % INPUTS:
 % h    = Functional form of our inverse problem - data (n x 1 symbolic)
-% Cd   = Covariance matrix (n x n)
 % var0 = Initial guess of variables you want to solve for (symbolic terms
 %        in h). Note, must be in alphebetical order. (m x 1)
 % J    = Jacobian matrix of h (n x m). Note, Jacobian must also be
 %        calcluated s.t. partial derivatives in comumns 1,2...m are in same
 %        order as var0. 
+% ep   = Convergence criteria (scalar)
+
 % OUTPUTS:
 % x    = vector containing final estimation of variables
 % k    = number of iterations needed to converge on final estimations
 % Cm   = model covariance matrix
 % X2   = Chi-squared value
 
+
+
+
 % Set generic parameters
-v     = 0.5;           % Dampening factor
+v     = 0.5;         % Dampening factor
 l0    = 1;           % Lamda (dampening)
-ep    = 1e-9;          % Accuracy for calculation
-Cdi   = inv(sqrt(Cd)); % invert covariance matrix & sqrt
 
 % Find number of variables to solve for
 lmvars = symvar(h); 
 nv     = length(lmvars); 
 nd     = length(J); 
+I      = eye(nv);
 
 % Set number of iterations 
 % Note: Will only iterate until convergence test is passed
-nints = 20; 
+nints = 100; 
 
 dea = []; dca = [];
 % Iterate 
@@ -41,15 +45,15 @@ for k = 1:nints
             evalc([varstr '=' num2str(var0(j))]); 
         end
         l = l0; 
-        fi = Cdi*eval(subs(h)); 
+        fi = eval(subs(h)); 
         ri = (fi'*fi); 
         ci = 0;
     end
     
     % calculate Jacobian
-    Ji = Cdi*eval(subs(J)); 
+    Ji = eval(subs(J)); 
     % calculate residual function
-    fi = Cdi*eval(subs(h));
+    fi = eval(subs(h));
 
     % calculate convergence test
     cn = 2.*Ji'*fi; 
@@ -61,7 +65,7 @@ for k = 1:nints
     end
     
     % calculate Hessian 
-    Hi  = (Ji'*Ji)+(eye(nv).*l);
+    Hi  = (Ji'*Ji)+(I.*l);
     % calculate incremental change in model 
     dm = -inv(Hi)*Ji'*fi; 
     
@@ -88,8 +92,6 @@ for k = 1:nints
     % update residual and cost function
     ri = rn; 
     ci = cn; 
-    
-    disp(k); 
     
 end
 

@@ -1,8 +1,8 @@
 % Paula Burgi
 % Midterm 2, Problem 2
 
-%clear
-% close all
+clear
+close all
 
 %% Part a - generate gravity data
 % parameters
@@ -85,14 +85,11 @@ for i = 1:m
 end
 
 % initial guess 
-%var0 = h - 1; 
-var0 = ones(n,1).*12.5; 
-
-% convergence criteria 
-ep = 1e-2; 
+var0 = h - 1; 
+%var0 = ones(n,1).*12.5; 
 
 % find height values using LM code
-[varf, k, Cm, X2] = LMLSQ(f, var0, J, ep); 
+[varf, k, Cm, X2] = LMLSQ(f, var0, J); 
 varf = varf';
 
 disp(['Number of iterations to convergence (non-reg): ' num2str(k)]);
@@ -106,41 +103,22 @@ xlabel('distance (m)');
 ylabel('depth (m)'); 
 legend('true model', 'initial guess', 'LM non-reg solution'); 
 
-p_value = chi2cdf(X2,m-n, 'upper')
-
-% The p-value for the the non-regularized result is 0. This implies that it
-% is outside the limits of a good p-value. 
+p_value = chi2cdf(X2,n-length(var0), 'upper')
+% COMMENT ON PVALUE
 
 
 
 %% Part d - Regularization 
-% alpha (regularization weighting)
-ai  = 121; %1:10:500;
-varfra = [];
-for j = 1:length(ai)
-    a = ai(j); 
-    % 2nd order Tikhonov matrix
-    L  = [-2 1 zeros(1, n-3) 1; diff(diff(eye(n)));1 zeros(1, n-3) 1 -2];%.*(1/(dn.^2)); 
-    for i = 1:m
-        if i < 10
-            hsi = ['hs0' num2str(i)]; 
-        else
-            hsi = ['hs' num2str(i)]; 
-        end
-        evalc([hsi '=' num2str(var0(i))]);
-    end
-    d0  = eval(subs(d_all)); 
-    dxx = ones(m,1); 
-    % augment residual function and jacobian
-    fa = [f; a.*L*var0]; 
-    K =  [J; a.*L]; 
+% lambda
+a  = 1; 
+% 2nd order Tikhonov matrix
+L  = [-2 1 zeros(1, n-2); diff(diff(eye(n))); zeros(1, n-2) -2 1]; 
+% augment residual function and jacobian
+fa = a.*[f; L*d0]; 
+K =  [J; a.*L]; 
 
-    % calculate model
-    [varfr, k, Cm, X2r] = LMLSQ(fa, var0, K, ep); 
-    
-    varfra = [varfra varfr']; 
-
-end
+% calculate model
+[varfr, k, Cm, X2] = LMLSQ(fa, var0, K); 
 
 disp(['choice of alpha: ' num2str(a)]); 
 disp(['Number of iterations to convergence (reg): ' num2str(k)]);
@@ -151,16 +129,142 @@ disp(['Number of iterations to convergence (reg): ' num2str(k)]);
 figure; hold on; box on;
 plot(xn, h, 'k'); 
 plot(xn, var0, 'r'); 
-plot(xn, varfra, 'b'); 
+plot(xn, varfr, 'b'); 
 xlabel('distance (m)'); 
 ylabel('depth (m)'); 
 legend('true model', 'initial guess', 'LM reg. solution'); 
 
 % calculate chi^2
-p_value = chi2cdf(X2r,n, 'upper')
+p_value = chi2cdf(X2,n-length(var0), 'upper')
 
-% with regularization (where DOF = n), the p-value is ~0.96, which means
-% the results are acceptable. 
+% COMMENT ON PVALUE
+
+
+keyboard
+
+
+
+
+
+
+
+
+
+
+% forward model
+for i = 1:m
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    evalc([hsi '=' num2str(varfr(i))]);
+end
+destr  = eval(subs(d_all)); 
+
+figure; hold on; 
+plot(xn, dn, 'k'); 
+plot(xn, d0, 'r'); 
+plot(xn, dest, 'b'); 
+plot(xn, dest, 'g'); 
+
+
+figure; hold on; 
+plot(xn, h, 'k'); 
+plot(xn, var0, 'r'); 
+plot(xn, varf, 'b'); 
+plot(xn, varfr, 'g'); 
+
+
+
+
+% forward model
+for i = 1:m
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    evalc([hsi '=' num2str(varf(i))]);
+end
+dest = eval(subs(d_all)); 
+for i = 1:m
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    evalc([hsi '=' num2str(var0(i))]);
+end
+d0  = eval(subs(d_all)); 
+
+figure; hold on; 
+plot(xn, dn, 'k'); 
+plot(xn, d0, 'r'); 
+plot(xn, dest, 'b');
+
+
+
+
+% forward model
+for i = 1:m
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    evalc([hsi '=' num2str(varf(i))]);
+end
+dest = eval(subs(d_all)); 
+for i = 1:m
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    evalc([hsi '=' num2str(var0(i))]);
+end
+d0  = eval(subs(d_all)); 
+
+figure; hold on; 
+plot(xn, dn, 'k'); 
+plot(xn, d0, 'r'); 
+plot(xn, dest, 'b');
+
+
+
+% % forward model
+% for i = 1:m
+%     if i < 10
+%         hsi = ['hs0' num2str(i)]; 
+%     else
+%         hsi = ['hs' num2str(i)]; 
+%     end
+%     evalc([hsi '=' num2str(varf(i))]);
+% end
+% dest = eval(subs(d_all)); 
+% for i = 1:m
+%     if i < 10
+%         hsi = ['hs0' num2str(i)]; 
+%     else
+%         hsi = ['hs' num2str(i)]; 
+%     end
+%     evalc([hsi '=' num2str(var0(i))]);
+% end
+% d0  = eval(subs(d_all)); 
+% 
+% figure; hold on; 
+% plot(xn, dn, 'k'); 
+% plot(xn, d0, 'r'); 
+% plot(xn, dest, 'b');
+
+
+
+
+
+
+
+
 
 
 

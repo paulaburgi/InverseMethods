@@ -1,0 +1,399 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Midterm2_problem2</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-12"><meta name="DC.source" content="Midterm2_problem2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Part a - generate gravity data</a></li><li><a href="#3">Part b - use LM subroutine to find height of pipe</a></li><li><a href="#4">Part c - plot non-regularized results &amp; chi^2</a></li><li><a href="#5">Part d - Regularization</a></li><li><a href="#6">Part e - calculate chi^2</a></li></ul></div><pre class="codeinput"><span class="comment">% Paula Burgi</span>
+<span class="comment">% Midterm 2, Problem 2</span>
+
+<span class="comment">%clear</span>
+<span class="comment">% close all</span>
+</pre><h2 id="2">Part a - generate gravity data</h2><p>parameters</p><pre class="codeinput">n = 40;
+m = 40;
+L  = 40;
+hs = sym(<span class="string">'hs'</span>);
+xs = sym(<span class="string">'xs'</span>);
+sn = linspace(1,40,n)';
+xn = linspace(1,40,n)';
+
+<span class="comment">% function that represents real pipe height (data)</span>
+h1 = (2.*pi.*(xn-(L./4)))./L;
+h2 = (2.*pi.*(xn-((3.*L)./4)))./L;
+h  = 15 - (5./2).*tanh(h1) + (5/2).*tanh(h2);
+<span class="comment">% functional form of data</span>
+df  = hs./(((sn-xs).^2 + hs.^2).^(3/2));
+
+<span class="comment">% turn integral into sum in gravity equation</span>
+<span class="comment">% sum over all x's a d symbolic variables hsi</span>
+d_all = [];
+<span class="keyword">for</span> i = 1:m
+    <span class="comment">% add 0 if i=1-9 so symvar puts in correct order</span>
+    <span class="keyword">if</span> i &lt; 10
+        hsi = [<span class="string">'hs0'</span> num2str(i)];
+    <span class="keyword">else</span>
+        hsi = [<span class="string">'hs'</span> num2str(i)];
+    <span class="keyword">end</span>
+    <span class="comment">% create symbolic variable for each hieght estimate</span>
+    sym(hsi);
+    <span class="comment">% substitute x and hs into gravity equation and sum</span>
+    di = subs(df, hs, hsi);
+    di = subs(di, xs, i);
+    <span class="keyword">if</span> i == 1
+        d_all = di;
+    <span class="keyword">else</span>
+        d_all = d_all+di;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% generate gravity anomaly data</span>
+<span class="keyword">for</span> i = 1:m
+    <span class="comment">% add 0 if i=1-9 so symvar puts in correct order</span>
+    <span class="keyword">if</span> i &lt; 10
+        hsi = [<span class="string">'hs0'</span> num2str(i)];
+    <span class="keyword">else</span>
+        hsi = [<span class="string">'hs'</span> num2str(i)];
+    <span class="keyword">end</span>
+    <span class="comment">% let each height variable equal result from given function</span>
+    evalc([hsi <span class="string">'='</span> num2str(h(i))]);
+<span class="keyword">end</span>
+
+<span class="comment">% evaluate gravity function after above for-loop assigned values to each</span>
+<span class="comment">% symbolic variable hsi s.t. they are equal to result from equation 1.25</span>
+dnn = eval(subs(d_all));
+<span class="comment">% add 1% noise</span>
+st  = max(dnn).*0.01;
+dn  = dnn + randn(40,1).*st;
+</pre><h2 id="3">Part b - use LM subroutine to find height of pipe</h2><p>calculate covar matrix</p><pre class="codeinput">Cd   = eye(m).*(st^2);
+Cdi  = inv(sqrt(Cd));
+
+<span class="comment">% calculate residual function f to go in LM code</span>
+f    = Cdi*(d_all - dn);
+
+<span class="comment">% calculate Jacobian</span>
+J = [];
+<span class="keyword">for</span> i = 1:m
+    <span class="comment">% add 0 if i=1-9 so symvar puts in correct order</span>
+    <span class="keyword">if</span> i &lt; 10
+        hsi = [<span class="string">'hs0'</span> num2str(i)];
+    <span class="keyword">else</span>
+        hsi = [<span class="string">'hs'</span> num2str(i)];
+    <span class="keyword">end</span>
+    <span class="comment">% add column to jacobian with derivative wrt each hieght variable hsi</span>
+    Ji  = diff(f, hsi);
+    J   = [J Ji];
+<span class="keyword">end</span>
+
+<span class="comment">% initial guess</span>
+<span class="comment">%var0 = h - 1;</span>
+var0 = ones(n,1).*12.5;
+
+<span class="comment">% convergence criteria</span>
+ep = 1e-2;
+
+<span class="comment">% find height values using LM code</span>
+[varf, k, Cm, X2] = LMLSQ(f, var0, J, ep);
+varf = varf';
+
+disp([<span class="string">'Number of iterations to convergence (non-reg): '</span> num2str(k)]);
+</pre><pre class="codeoutput">Number of iterations to convergence (non-reg): 100
+</pre><h2 id="4">Part c - plot non-regularized results &amp; chi^2</h2><pre class="codeinput">figure; hold <span class="string">on</span>; box <span class="string">on</span>;
+plot(xn, h, <span class="string">'k'</span>);
+plot(xn, var0, <span class="string">'r'</span>);
+plot(xn, varf, <span class="string">'b'</span>);
+xlabel(<span class="string">'distance (m)'</span>);
+ylabel(<span class="string">'depth (m)'</span>);
+legend(<span class="string">'true model'</span>, <span class="string">'initial guess'</span>, <span class="string">'LM non-reg solution'</span>);
+
+p_value = chi2cdf(X2,m-n, <span class="string">'upper'</span>)
+
+<span class="comment">% The p-value for the the non-regularized result is 0. This implies that it</span>
+<span class="comment">% is outside the limits of a good p-value.</span>
+</pre><pre class="codeoutput">
+p_value =
+
+     0
+
+</pre><img vspace="5" hspace="5" src="Midterm2_problem2_01.png" alt=""> <h2 id="5">Part d - Regularization</h2><p>alpha (regularization weighting)</p><pre class="codeinput">ai  = 121; <span class="comment">%1:10:500;</span>
+varfra = [];
+<span class="keyword">for</span> j = 1:length(ai)
+    a = ai(j);
+    <span class="comment">% 2nd order Tikhonov matrix</span>
+    L  = [-2 1 zeros(1, n-3) 1; diff(diff(eye(n)));1 zeros(1, n-3) 1 -2];<span class="comment">%.*(1/(dn.^2));</span>
+    <span class="keyword">for</span> i = 1:m
+        <span class="keyword">if</span> i &lt; 10
+            hsi = [<span class="string">'hs0'</span> num2str(i)];
+        <span class="keyword">else</span>
+            hsi = [<span class="string">'hs'</span> num2str(i)];
+        <span class="keyword">end</span>
+        evalc([hsi <span class="string">'='</span> num2str(var0(i))]);
+    <span class="keyword">end</span>
+    d0  = eval(subs(d_all));
+    dxx = ones(m,1);
+    <span class="comment">% augment residual function and jacobian</span>
+    fa = [f; a.*L*var0];
+    K =  [J; a.*L];
+
+    <span class="comment">% calculate model</span>
+    [varfr, k, Cm, X2r] = LMLSQ(fa, var0, K, ep);
+
+    varfra = [varfra varfr'];
+
+<span class="keyword">end</span>
+
+disp([<span class="string">'choice of alpha: '</span> num2str(a)]);
+disp([<span class="string">'Number of iterations to convergence (reg): '</span> num2str(k)]);
+</pre><pre class="codeoutput">choice of alpha: 121
+Number of iterations to convergence (reg): 9
+</pre><h2 id="6">Part e - calculate chi^2</h2><pre class="codeinput"><span class="comment">% plot</span>
+figure; hold <span class="string">on</span>; box <span class="string">on</span>;
+plot(xn, h, <span class="string">'k'</span>);
+plot(xn, var0, <span class="string">'r'</span>);
+plot(xn, varfra, <span class="string">'b'</span>);
+xlabel(<span class="string">'distance (m)'</span>);
+ylabel(<span class="string">'depth (m)'</span>);
+legend(<span class="string">'true model'</span>, <span class="string">'initial guess'</span>, <span class="string">'LM reg. solution'</span>);
+
+<span class="comment">% calculate chi^2</span>
+p_value = chi2cdf(X2r,n, <span class="string">'upper'</span>)
+
+<span class="comment">% with regularization (where DOF = n), the p-value is ~0.96, which means</span>
+<span class="comment">% the results are acceptable.</span>
+</pre><pre class="codeoutput">
+p_value =
+
+    0.9835
+
+</pre><img vspace="5" hspace="5" src="Midterm2_problem2_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Paula Burgi
+% Midterm 2, Problem 2
+
+%clear
+% close all
+
+%% Part a - generate gravity data
+% parameters
+n = 40; 
+m = 40; 
+L  = 40; 
+hs = sym('hs'); 
+xs = sym('xs'); 
+sn = linspace(1,40,n)'; 
+xn = linspace(1,40,n)';
+
+% function that represents real pipe height (data)
+h1 = (2.*pi.*(xn-(L./4)))./L;
+h2 = (2.*pi.*(xn-((3.*L)./4)))./L;
+h  = 15 - (5./2).*tanh(h1) + (5/2).*tanh(h2); 
+% functional form of data
+df  = hs./(((sn-xs).^2 + hs.^2).^(3/2)); 
+
+% turn integral into sum in gravity equation
+% sum over all x's a d symbolic variables hsi
+d_all = []; 
+for i = 1:m
+    % add 0 if i=1-9 so symvar puts in correct order
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    % create symbolic variable for each hieght estimate
+    sym(hsi); 
+    % substitute x and hs into gravity equation and sum
+    di = subs(df, hs, hsi);
+    di = subs(di, xs, i); 
+    if i == 1
+        d_all = di; 
+    else
+        d_all = d_all+di; 
+    end
+end
+
+% generate gravity anomaly data 
+for i = 1:m
+    % add 0 if i=1-9 so symvar puts in correct order
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    % let each height variable equal result from given function
+    evalc([hsi '=' num2str(h(i))]);
+end
+
+% evaluate gravity function after above for-loop assigned values to each
+% symbolic variable hsi s.t. they are equal to result from equation 1.25
+dnn = eval(subs(d_all)); 
+% add 1% noise 
+st  = max(dnn).*0.01; 
+dn  = dnn + randn(40,1).*st; 
+
+%% Part b - use LM subroutine to find height of pipe
+% calculate covar matrix
+Cd   = eye(m).*(st^2); 
+Cdi  = inv(sqrt(Cd)); 
+
+% calculate residual function f to go in LM code 
+f    = Cdi*(d_all - dn); 
+
+% calculate Jacobian 
+J = []; 
+for i = 1:m
+    % add 0 if i=1-9 so symvar puts in correct order
+    if i < 10
+        hsi = ['hs0' num2str(i)]; 
+    else
+        hsi = ['hs' num2str(i)]; 
+    end
+    % add column to jacobian with derivative wrt each hieght variable hsi
+    Ji  = diff(f, hsi);
+    J   = [J Ji]; 
+end
+
+% initial guess 
+%var0 = h - 1; 
+var0 = ones(n,1).*12.5; 
+
+% convergence criteria 
+ep = 1e-2; 
+
+% find height values using LM code
+[varf, k, Cm, X2] = LMLSQ(f, var0, J, ep); 
+varf = varf';
+
+disp(['Number of iterations to convergence (non-reg): ' num2str(k)]);
+
+%% Part c - plot non-regularized results & chi^2
+figure; hold on; box on;
+plot(xn, h, 'k'); 
+plot(xn, var0, 'r'); 
+plot(xn, varf, 'b'); 
+xlabel('distance (m)'); 
+ylabel('depth (m)'); 
+legend('true model', 'initial guess', 'LM non-reg solution'); 
+
+p_value = chi2cdf(X2,m-n, 'upper')
+
+% The p-value for the the non-regularized result is 0. This implies that it
+% is outside the limits of a good p-value. 
+
+
+
+%% Part d - Regularization 
+% alpha (regularization weighting)
+ai  = 121; %1:10:500;
+varfra = [];
+for j = 1:length(ai)
+    a = ai(j); 
+    % 2nd order Tikhonov matrix
+    L  = [-2 1 zeros(1, n-3) 1; diff(diff(eye(n)));1 zeros(1, n-3) 1 -2];%.*(1/(dn.^2)); 
+    for i = 1:m
+        if i < 10
+            hsi = ['hs0' num2str(i)]; 
+        else
+            hsi = ['hs' num2str(i)]; 
+        end
+        evalc([hsi '=' num2str(var0(i))]);
+    end
+    d0  = eval(subs(d_all)); 
+    dxx = ones(m,1); 
+    % augment residual function and jacobian
+    fa = [f; a.*L*var0]; 
+    K =  [J; a.*L]; 
+
+    % calculate model
+    [varfr, k, Cm, X2r] = LMLSQ(fa, var0, K, ep); 
+    
+    varfra = [varfra varfr']; 
+
+end
+
+disp(['choice of alpha: ' num2str(a)]); 
+disp(['Number of iterations to convergence (reg): ' num2str(k)]);
+
+%% Part e - calculate chi^2
+
+% plot
+figure; hold on; box on;
+plot(xn, h, 'k'); 
+plot(xn, var0, 'r'); 
+plot(xn, varfra, 'b'); 
+xlabel('distance (m)'); 
+ylabel('depth (m)'); 
+legend('true model', 'initial guess', 'LM reg. solution'); 
+
+% calculate chi^2
+p_value = chi2cdf(X2r,n, 'upper')
+
+% with regularization (where DOF = n), the p-value is ~0.96, which means
+% the results are acceptable. 
+
+
+
+
+##### SOURCE END #####
+--></body></html>

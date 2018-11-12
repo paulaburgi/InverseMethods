@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Midterm2_problem1</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-07"><meta name="DC.source" content="Midterm2_problem1.m"><style type="text/css">
+      --><title>Midterm2_problem1</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-12"><meta name="DC.source" content="Midterm2_problem1.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -81,33 +81,36 @@ S = sym(<span class="string">'S'</span>); <span class="comment">% Storativity (d
 Q = 50;       <span class="comment">% Water volume in (m^3)</span>
 d = 60;       <span class="comment">% Dist between wells (m)</span>
 s = 0.01;     <span class="comment">% Standard deviation (m)</span>
+<span class="comment">% calculate covariance matrix</span>
+n  = length(t);
+Cd = eye(n)*(s.^2);
+Cdi = inv(sqrt(Cd));
 
 <span class="comment">% input functional form of slug test</span>
 h1  = Q./(4.*pi.*T.*t);
 h2  = exp((-(d.^2).*S)./(4.*T.*t));
 hd  = h1.*h2;
 <span class="comment">% calculate residual between functional form and data</span>
-h   = hd-hm;
+h   = Cdi*(hd-hm);
 
 <span class="comment">% calculate Jacobian</span>
 fiS = diff(h, S);
 fiT = diff(h, T);
 J   = [fiS fiT];
 
-<span class="comment">% calculate covariance matrix</span>
-n  = length(t);
-Cd = eye(n)*(s.^2);
-
 <span class="comment">% initial guess</span>
 S0    = 7e-4;
 T0    = .2;
 var0  = [S0; T0];
 
+<span class="comment">% convergence criteria</span>
+ep    = 1e-9;
+
 <span class="comment">% Use LM method to calculate T &amp; S</span>
-[x, k, Cm, chi2] = LMLSQ(h, Cd, var0, J);
+[x, k, Cm, chi2] = LMLSQ(h, var0, J, ep);
 
 disp([<span class="string">'Number of iterations to convergence: '</span> num2str(k)]);
-</pre><pre class="codeoutput">Number of iterations to convergence: 11
+</pre><pre class="codeoutput">Number of iterations to convergence: 10
 </pre><h2 id="3">Part c: Sate S and T with STD</h2><pre class="codeinput"><span class="comment">% get values of S and T</span>
 Sf     = x(1);
 Tf     = x(2);
@@ -144,7 +147,7 @@ idx = [];
     <span class="keyword">for</span> j = 1:length(Si)
         T = Ti(i);
         S = Si(j);
-        r = eval(subs(h))./s;
+        r = eval(subs(h));
         xi = r'*r;
         X2 = [X2; xi];
         idx = [idx; i j];
@@ -173,7 +176,7 @@ idx = [];
     <span class="keyword">for</span> j = 1:length(Si)
         T = Ti(i);
         S = Si(j);
-        r = eval(subs(h))./s;
+        r = eval(subs(h));
         xi = r'*r;
         X2 = [X2; xi];
         idx = [idx; i j];
@@ -194,7 +197,7 @@ title(<span class="string">'Chi-squared contour plot (zoom)'</span>);
 </pre><pre class="codeoutput">
 p_value =
 
-   0.900954213026755
+    0.9010
 
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
@@ -216,30 +219,33 @@ S = sym('S'); % Storativity (dimensionless)
 Q = 50;       % Water volume in (m^3)
 d = 60;       % Dist between wells (m)
 s = 0.01;     % Standard deviation (m)
+% calculate covariance matrix
+n  = length(t); 
+Cd = eye(n)*(s.^2); 
+Cdi = inv(sqrt(Cd)); 
 
 % input functional form of slug test
 h1  = Q./(4.*pi.*T.*t); 
 h2  = exp((-(d.^2).*S)./(4.*T.*t)); 
 hd  = h1.*h2;
 % calculate residual between functional form and data
-h   = hd-hm; 
+h   = Cdi*(hd-hm); 
 
 % calculate Jacobian
 fiS = diff(h, S); 
 fiT = diff(h, T); 
 J   = [fiS fiT];
 
-% calculate covariance matrix
-n  = length(t); 
-Cd = eye(n)*(s.^2); 
-
 % initial guess 
 S0    = 7e-4; 
 T0    = .2;
 var0  = [S0; T0];
 
+% convergence criteria 
+ep    = 1e-9; 
+
 % Use LM method to calculate T & S 
-[x, k, Cm, chi2] = LMLSQ(h, Cd, var0, J); 
+[x, k, Cm, chi2] = LMLSQ(h, var0, J, ep); 
 
 disp(['Number of iterations to convergence: ' num2str(k)]); 
 
@@ -286,7 +292,7 @@ for i=1:length(Ti)
     for j = 1:length(Si)
         T = Ti(i); 
         S = Si(j); 
-        r = eval(subs(h))./s; 
+        r = eval(subs(h)); 
         xi = r'*r; 
         X2 = [X2; xi]; 
         idx = [idx; i j];
@@ -315,7 +321,7 @@ for i=1:length(Ti)
     for j = 1:length(Si)
         T = Ti(i); 
         S = Si(j); 
-        r = eval(subs(h))./s; 
+        r = eval(subs(h)); 
         xi = r'*r; 
         X2 = [X2; xi]; 
         idx = [idx; i j];
