@@ -1,6 +1,6 @@
 %% Load data, build basic G
 
-close all
+%close all
 clear 
 
 ccdir = '/data/pmb229/other/clearcuttingTStest/'; 
@@ -18,7 +18,9 @@ ccdir = '/data/pmb229/other/clearcuttingTStest/';
     dc     = d.dateCombos; 
     bl     = abs(d.bl); % have to make bl positive for inversion to work
     dta    = diff(dn_all); 
-
+    
+    % gidx, remove a few
+    gidx = [gidx(1:17); gidx(20:end)]; 
 
 % extra ints to connect with network
     exints = [733236 733604; 733742 733972; 733788 733972];
@@ -68,11 +70,16 @@ ccdir = '/data/pmb229/other/clearcuttingTStest/';
 %% Compare data to inv with and without DEM Error
 % noise weight
 nw  = 0.1; 
-n   = [(rand(length(dc), 1)-0.5).*nw; zeros(nrdi, 1)];
+% n   = [(rand(length(dc), 1)-0.5).*nw; zeros(nrdi, 1)];
+load('noisev1.mat'); 
 
 % define time steps and "real" deformation
-vel  = ones(nvels, 1).*3; 
-def  = Ga*vel; 
+%vel  = ones(nvels, 1).*0; 
+%def  = Ga*vel; 
+load('defv1.mat');
+def = def; 
+def = [def(1:17); def(20:end)]; 
+n = zeros(length(def)+nrdi, 1); 
 
 % create ints
 intsr = [def; zeros(nrdi, 1)];
@@ -83,9 +90,10 @@ blg    = [(4.*pi.*bl)./(l.*sr.*sind(los)); zeros(nrdi, 1)];
 %blg    = [bl; zeros(nrdi, 1)]; 
 Gbl    = [G abs(blg)]; 
 dz     = 30; 
-velz   = [vel; dz];
-intsrz = intsr+abs(blg.*dz); 
-intsz  = intsrz+n; 
+%intsrz = intsr+abs(blg.*dz); 
+%intsz  = intsrz+n; 
+intsz = intsr; 
+
 
 % calc Gsvd with baseline term 
 r2      = rank(Gbl); 
@@ -94,7 +102,7 @@ Gsvd    = V(:,1:r2)*inv(S(1:r2,1:r2))*U(:,1:r2)';
 mzsvd   = Gsvd*intsz; 
 mvel0   = mzsvd(1:end-1); 
 mz0     = mzsvd(end); 
-    
+
 
 %% Add it DEM error with each time step 
 
@@ -135,41 +143,60 @@ end
 svar  = [v; z];
 
 % create residual function
-G_m_ = G*v;
-for j = 1:length(dc)
-    if xa(j) > c
-        G_m_(j) = G_m_(j)+blg(j)*z; 
-    end
-end
+G_m_ = double(G)*v;
+
 % covariance matrix
 Cd   = eye(nints+nrdi).*(nw^2); 
-Cdi  = inv(sqrt(Cd)); 
-% residual function
-f = Cdi*(G_m_ - intsiz); 
+Cdi  = double(inv(sqrt(Cd))); 
 
-% create Jacobian 
-J = [];
-for i = 1:nvels+1
-    if i == nvels+1
-        Ji  = diff(f, z); 
-    else
-        vii = v(i); 
-        Ji  = diff(f, vii);
+% loop through Gs
+mnlvel = [];
+mnlz = [];
+r_all = [];
+for l = 1%1:nvels
+    for j = 1:length(dc)
+        if xa(j) > c
+            G_m_(j) = G_m_(j)+blg(j)*z; 
+        end
     end
-    J   = [J Ji]; 
-end
 
-% eps
-%var0  = zeros(nvels+1, 1); 
-var0  = 1:nvels+1; 
-ep    = 1e-3; 
+    % residual function
+    f = Cdi*(G_m_ - double(intsiz)); 
 
-% LM method
-varf   = LMLSQ_project(f, var0, J, ep, svar); 
-mnlvel = varf(1:end-1); 
-mnlz   = varf(end); 
+    % create Jacobian 
+    J = [];
+    for i = 1:nvels+1
+        if i == nvels+1
+            Ji  = diff(f, z); 
+        else
+            vii = v(i); 
+            Ji  = diff(f, vii);
+        end
+        J   = [J Ji]; 
+    end
 
+    % eps
+    %var0  = zeros(nvels+1, 1); 
+    var0  = 1:nvels+1; 
+    ep    = 1e-3; 
 
+    % LM method
+    [varf, k, Cm, X2]   = LMLSQ_project(f, var0, J, ep, svar); 
+    mnlvel = [mnlvel varf(1:end-1)]; 
+    mnlz   = [mnlz; varf(end)]; 
+
+    r_all = [r_all; X2];
+    disp(l); 
+end 
+
+disp(c); 
+[m, idx] = min(r_all)
+mnlveli = mnlvel(:,idx); 
+mnlzi = mnlz(idx); 
+
+figure; hold on; 
+plot(r_all); 
+plot(idx, m, '*');
 
 %% plot
 
@@ -177,30 +204,29 @@ figure; hold on; box on;
 dd     = diff(du); 
 vdates = du(1:end-1)+dd;  
 plot(vdates, zeros(nvels, 1), 'k', 'HandleVisibility','off'); 
-plot(vdates, [mvel0], 'linewidth', 2);
-plot(vdates, [mvel], 'linewidth', 2);
-plot(vdates, [mnlvel], 'linewidth', 2); 
+%plot(vdates, [mvel0], 'linewidth', 2);
+plot(vdates, [mvel./100], 'linewidth', 2, 'HandleVisibility','off'); 
+plot(vdates, [mvel./100], 'linewidth', 2); 
+plot(vdates, [mnlveli/100], 'linewidth', 2); 
 yl = ylim; 
 plot([vdates(c); vdates(c)], [-100 100], 'k--'); 
 plot(vdates(rdi), varf(rdi), '*'); 
 xlabel('Date'); 
-ylabel('Deformation'); 
+ylabel('Velocity'); 
 datetick('x'); 
 xlim([vdates(1) vdates(end)]);
 ylim(yl); 
 p = 3; % precision
-legend(['no error (lin), z=' num2str(mz0, p) 'm'], ...
-       ['dem error (lin), z=' num2str(mz, p) 'm'], ...
-       ['dem error (non lin), z=' num2str(mnlz, p) 'm'], ... 
-       ['dem error start, z=' num2str(dz, p) 'm'], ... 
+legend(['dem error (lin), z=' num2str(mz, p) 'm'], ...
+       ['dem error (non-lin), z=' num2str(mnlzi, p) 'm'], ... 
        'missing dates', ...
-       'location', 'southeast'); 
+       'location', 'northeast'); 
 
 
 
-
-
-
+% ['no error (lin), z=' num2str(mz0, p) 'm'], ...
+% 
+% ['dem error start, z=' num2str(dz, p) 'm'], ... 
 
 
 

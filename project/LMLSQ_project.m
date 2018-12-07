@@ -33,7 +33,7 @@ I      = eye(nv);
 
 % Set number of iterations 
 % Note: Will only iterate until convergence test is passed
-nints = 100; 
+nints = 10; 
 
 dea = []; dca = [];
 % Iterate 
@@ -94,7 +94,7 @@ for k = 1:nints
     ci = cn; 
     
 end
-k
+
 Cm = inv(Ji'*Ji); 
 x  = eval(svar); 
 X2 = ri; 
